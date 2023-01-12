@@ -10,16 +10,20 @@ const userList = async (req, resp) => {
 
 const userAdd = async (req, resp) => {
     let { name, email, mobile, password } = req.body;
-    let data = new Users({
-        name,
-        // email : req.body.email, we also call this way if name is different 
-        email,
-        mobile,
-        password
-    });
-    let response = await data.save()
-    let myToken = await data.getAuthToken();
-    resp.status(200).json({ message: 'ok', token: myToken });
+    try{
+        let data = new Users({
+            name,
+            // email : req.body.email, we also call this way if name is different 
+            email,
+            mobile,
+            password
+        });
+        let response = await data.save()
+        let myToken = await data.getAuthToken();
+        resp.status(200).json({ message: 'ok', token: myToken });
+    }catch(e){
+        resp.status(401).json(e);
+    }
 }
 
 const userLogin = async (req, resp) => {
