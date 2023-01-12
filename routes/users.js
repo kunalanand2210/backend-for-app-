@@ -12,7 +12,7 @@ router.use(bodyParser.urlencoded({extended:false}));
 
 
 router.get('/', (req , resp)=>{
-  resp.send('hello')
+  resp.send('hello user')
 });
 
 router.get('/list', passport.authenticate('jwt',{session:false}), userCtrl.userList);
