@@ -73,12 +73,12 @@ const userLogin = async (req, resp) => {
 
 const userUpdate = async (req, resp) => {
     try {
-        const { brand, product, customer_name, customer_mobile, customer_email, address, invoice } = req.body;
+        const { brand, product, customer_name, customer_mobile, customer_email, address, filedata, invoice } = req.body;
         const _id = req.params.id;
         const user = await Users.users.findById(_id);
 
 
-        data = new Users.data({ brand, product, customer_name, customer_mobile, customer_email, address, invoice, userId: req.params.id })
+        data = new Users.data({ brand, product, customer_name, customer_mobile, customer_email, address, filedata, invoice, userId: req.params.id })
         data_id = data._id;
         user.datas.push({ data: data_id });
         const response = await data.save();

@@ -11,6 +11,7 @@ const dataSchema = new mongoose.Schema({
     customer_mobile:String,
     customer_email:String,
     address:String,
+    filedata:String,
     invoice:String,
     userId:String,
 });
