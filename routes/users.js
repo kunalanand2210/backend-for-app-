@@ -12,15 +12,21 @@ router.use(bodyParser.urlencoded({extended:false}));
 
 
 router.get('/', (req , resp)=>{
-  resp.send('hello user')
+  resp.send('hello')
 });
 
 router.get('/list', passport.authenticate('jwt',{session:false}), userCtrl.userList);
+
+router.get('/lists', userCtrl.userList);
 
 router.post('/add', userCtrl.userAdd);
 
 router.post('/login',userCtrl.userLogin);
 
-router.patch('/update/:id', userCtrl.userUpdate);
+router.post('/update/:id', userCtrl.userUpdate);
+
+
+
+
 
 module.exports = router;

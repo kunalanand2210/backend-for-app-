@@ -4,25 +4,14 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
 
-const dataSchema = new mongoose.Schema({
-    brand:String,
-    product:String,
-    customer_name:String,
-    customer_mobile:String,
-    customer_email:String,
-    address:String,
-    invoice:String,
-    userId:String,
-});
-
-const data = mongoose.model('data', dataSchema);
 
 
-var userSchema = new mongoose.Schema({
+
+var adminSchema = new mongoose.Schema({
    
     name:String,
     email:String,
-    mobile:String,
+    usertype:String,
     password:{
         type:String,
         select:true
@@ -36,10 +25,7 @@ var userSchema = new mongoose.Schema({
         }
     ],
     
-    datas:[{
-        data:String,
-        
-    }]
+    
     
 },{
     timestamps:true
@@ -49,7 +35,7 @@ var userSchema = new mongoose.Schema({
 
 
 
-userSchema.pre('save',function(next){   
+adminSchema.pre('save',function(next){   
 var salt = bcrypt.genSaltSync(10);
 if(this.password && this.isModified('password')){
     this.password =  bcrypt.hashSync(this.password, salt);
@@ -57,11 +43,10 @@ if(this.password && this.isModified('password')){
  next();
 })
 
-userSchema.methods.getAuthToken = async function(data){
+adminSchema.methods.getAuthToken = async function(data){
     let params = {
         id:this._id,
-        email:this.email,
-        mobile:this.mobile
+        email:this.email
     }
     var tokenValue = jwt.sign(params, process.env.SECRETKEY,{expiresIn:'300000s'});
     this.tokens = this.tokens.concat({token:tokenValue})
@@ -69,5 +54,5 @@ userSchema.methods.getAuthToken = async function(data){
     return tokenValue;
 }
 
-let users = conn.model('users',userSchema)
-module.exports = {users, data};
+let admins = conn.model('admins',adminSchema)
+module.exports = admins;

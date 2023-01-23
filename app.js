@@ -16,8 +16,12 @@ require('dotenv').config({
 
 const userRoute = require('./routes/users');
 
+const adminRoute = require('./routes/admins');
+
 
 app.use('/users',userRoute)
+
+app.use('/admins',adminRoute)
 
 // app.post('/login', async (req, resp) => {
 //      if (req.body.email && req.body.password) {
