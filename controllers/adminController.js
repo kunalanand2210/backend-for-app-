@@ -114,6 +114,55 @@ const adminServiceList = async (req, resp) => {
     resp.status(200).send(responseType);
 }
 
+const serviceDetails = async (req, resp) => {
+    
+    const _id = req.params.id;
+    let data = await Users.data.findById(_id);
+
+    var responseType = {
+        message: 'ok',
+        
+    }
+    if(data){
+        responseType.message = 'Get detail succesfull';
+                responseType.status = 200;
+                responseType.result = data;
+    }else{
+        responseType.message = 'something went wrong';
+                responseType.status = 400;
+                responseType.result = data;
+    }
+    resp.status(responseType.status).send(responseType);
+}
+
+
+const paymentdetailUpdate = async (req, resp) => {
+    try {
+        const data = req.body;
+        const _id = req.params.id;
+        var responseType = {
+            message: 'ok'
+        }
+        const user = await Users.data.findById(_id);
+
+
+        paymentdetail = new Users.paymentdetail({payments:data});
+        paymentdetail_id = paymentdetail._id;
+        user.payment_details.push({ payment_detailid : paymentdetail_id});
+        const response = await paymentdetail.save();
+        const result = await user.save();
+        
+        if(response){
+            responseType.status =200;
+        }
+        resp.status(200).send(responseType);
+
+    } catch (e) {
+        resp.send(e);
+    }
+
+
+}
 
 
 
@@ -122,5 +171,7 @@ module.exports = {
     adminAdd,
     adminDelete,
     adminList,
-    adminServiceList
+    adminServiceList,
+    paymentdetailUpdate,
+    serviceDetails
 }

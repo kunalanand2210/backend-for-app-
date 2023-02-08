@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+
+
 var cors = require('cors');
 app.use(cors());
 app.use(express.json());
@@ -17,11 +19,17 @@ require('dotenv').config({
 const userRoute = require('./routes/users');
 
 const adminRoute = require('./routes/admins');
+const bodyParser = require('body-parser');
 
 
 app.use('/users',userRoute)
 
 app.use('/admins',adminRoute)
+
+
+// app.use(express.static('./public/'));
+
+app.use("/public", express.static(path.join(__dirname, 'public')));
 
 // app.post('/login', async (req, resp) => {
 //      if (req.body.email && req.body.password) {

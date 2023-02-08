@@ -3,17 +3,40 @@ const conn = require('../config/db')
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
+const paymentdetailSchema = new mongoose.Schema({
+    payments:Array,
+});
+
+const paymentdetail = mongoose.model('paymentdetail', paymentdetailSchema);
 
 const dataSchema = new mongoose.Schema({
-    brand:String,
-    product:String,
-    customer_name:String,
-    customer_mobile:String,
-    customer_email:String,
+    firstname:String,
+    lastname:String,
+    mobile:String,
+    altmobile:String,
+    email:String,
     address:String,
-    filedata:String,
-    invoice:String,
+    city:String,
+    state:String,
+    pincode:String,
+
+    brand:String,
+    productname:String,
+    complaint_type:String,
+    warranty:String,
+    purchase_date:Date,
+    set_serialno:String,
+    query:String,
+    invoice:Array,
+    issue_image:Array,
+    under_warranty:Array,
     userId:String,
+    payment_details:[{
+        payment_detailid:String,
+        
+    }],
+},{
+    timestamps:true
 });
 
 const data = mongoose.model('data', dataSchema);
@@ -71,4 +94,4 @@ userSchema.methods.getAuthToken = async function(data){
 }
 
 let users = conn.model('users',userSchema)
-module.exports = {users, data};
+module.exports = {users, data, paymentdetail};

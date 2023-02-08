@@ -22,4 +22,8 @@ router.post('/login', adminCtrl.adminLogin);
 
 router.delete('/delete/:id', passport.authenticate('jwt',{session:false}), adminCtrl.adminDelete);
 
+router.post('/paymentdetail/:id', passport.authenticate('jwt',{session:false}), adminCtrl.paymentdetailUpdate);
+
+router.get('/servicedetail/:id', adminCtrl.serviceDetails);
+
 module.exports = router;
