@@ -101,7 +101,22 @@ const adminList = async (req, resp) => {
 
 const adminServiceList = async (req, resp) => {
 
-    let data = await Users.data.find();
+    let data = await Users.data.find({ complaint_type : 'Service'});
+    var responseType = {
+        message: 'ok',
+        
+    }
+    if(data){
+        responseType.message = 'Get list succesfull';
+                responseType.status = 200;
+                responseType.result = data;
+    }
+    resp.status(200).send(responseType);
+}
+
+const adminInstallationList = async (req, resp) => {
+
+    let data = await Users.data.find({ complaint_type : 'Installation'});
     var responseType = {
         message: 'ok',
         
@@ -139,6 +154,7 @@ const serviceDetails = async (req, resp) => {
 const paymentdetailUpdate = async (req, resp) => {
     try {
         const data = req.body;
+        console.log(data);
         const _id = req.params.id;
         var responseType = {
             message: 'ok'
@@ -146,7 +162,7 @@ const paymentdetailUpdate = async (req, resp) => {
         const user = await Users.data.findById(_id);
 
 
-        paymentdetail = new Users.paymentdetail({payments:data});
+        paymentdetail = new Users.paymentdetail({payments:data.formValues , userId : data.userid , serviceId : _id });
         paymentdetail_id = paymentdetail._id;
         user.payment_details.push({ payment_detailid : paymentdetail_id});
         const response = await paymentdetail.save();
@@ -164,6 +180,21 @@ const paymentdetailUpdate = async (req, resp) => {
 
 }
 
+const paymentDelete = async (req, resp) => {
+    const service = await Users.paymentdetail.findById(req.params.id);
+    const serviceid = service.serviceId;
+    console.log(serviceid);
+    // Users.paymentdetail.findByIdAndDelete(req.params.id, (err, Admins) => {
+    //     if (err) return resp.status(404).send(err);
+    //     const response = {
+    //         message: "payment data successfully deleted",
+    //         status: 200
+    //     };
+    //     return resp.status(200).send(response);
+    // });
+
+}
+
 
 
 module.exports = {
@@ -172,6 +203,8 @@ module.exports = {
     adminDelete,
     adminList,
     adminServiceList,
+    adminInstallationList,
     paymentdetailUpdate,
-    serviceDetails
+    serviceDetails,
+    paymentDelete
 }

@@ -25,8 +25,6 @@ var adminSchema = new mongoose.Schema({
         }
     ],
     
-    
-    
 },{
     timestamps:true
 })
@@ -46,8 +44,10 @@ if(this.password && this.isModified('password')){
 adminSchema.methods.getAuthToken = async function(data){
     let params = {
         id:this._id,
-        email:this.email
+        email:this.email,
+        role:this.usertype,
     }
+
     var tokenValue = jwt.sign(params, process.env.SECRETKEY,{expiresIn:'300000s'});
     this.tokens = this.tokens.concat({token:tokenValue})
     await this.save();

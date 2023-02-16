@@ -18,6 +18,10 @@ router.get('/list', passport.authenticate('jwt',{session:false}), adminCtrl.admi
 
 router.get('/service', adminCtrl.adminServiceList);
 
+router.post('/paymentdelete/:id', adminCtrl.paymentDelete);
+
+router.get('/installation', adminCtrl.adminInstallationList);
+
 router.post('/login', adminCtrl.adminLogin);
 
 router.delete('/delete/:id', passport.authenticate('jwt',{session:false}), adminCtrl.adminDelete);

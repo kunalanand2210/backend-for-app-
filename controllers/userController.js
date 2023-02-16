@@ -1,9 +1,10 @@
 const Users = require('../models/users');
 
-
-
 var bcrypt = require('bcryptjs');
 
+const crypto = require("crypto");
+
+const instance = require('../files/razorPayinstance');
 
 const userList = async (req, resp) => {
     let data = await Users.users.find();
@@ -15,12 +16,12 @@ const userData = async (req, resp) => {
     let data = await Users.users.findById(_id);
     var responseType = {
         message: 'ok',
-        
+
     }
-    if(data){
+    if (data) {
         responseType.message = 'Get userData succesfull';
-                responseType.status = 200;
-                responseType.result = data;
+        responseType.status = 200;
+        responseType.result = data;
     }
     resp.status(200).send(responseType);
 }
@@ -116,7 +117,7 @@ const userUpdate = async (req, resp) => {
             purchase_date: purchase_date,
             set_serialno: set_serialno,
             query: query,
-            userId:_id,
+            userId: _id,
         })
 
         const imagedata_id = imagedata._id;
@@ -126,6 +127,7 @@ const userUpdate = async (req, resp) => {
 
         if (response) {
             responseType.status = 200;
+            responseType.id = imagedata_id;
         }
         resp.status(200).send(responseType);
 
@@ -139,22 +141,134 @@ const userUpdate = async (req, resp) => {
 
 const userServiceList = async (req, resp) => {
     const _id = req.params.id;
-    let data = await Users.data.find({userId : _id});
+    let data = await Users.data.find({ userId: _id, complaint_type: 'Service' });
     var responseType = {
         message: 'ok',
-        
+
     }
-    if(data){
+    if (data) {
         responseType.message = 'Get list succesfull';
-                responseType.status = 200;
-                responseType.result = data;
+        responseType.status = 200;
+        responseType.result = data;
+
+    }
+    resp.status(200).send(responseType);
+}
+
+const userInstallationList = async (req, resp) => {
+    const _id = req.params.id;
+    let data = await Users.data.find({ userId: _id, complaint_type: 'Installation' });
+    var responseType = {
+        message: 'ok',
+
+    }
+    if (data) {
+        responseType.message = 'Get list succesfull';
+        responseType.status = 200;
+        responseType.result = data;
+
+    }
+    resp.status(200).send(responseType);
+}
+
+const userPaymentList = async (req, resp) => {
+    const _id = req.params.id;
+
+    let data = await Users.paymentdetail.find({ userId: _id });
+    var responseType = {
+        message: 'ok',
+
+    }
+    if (data) {
+        responseType.message = 'Get list succesfull';
+        responseType.status = 200;
+        responseType.result = data;
+
+    }
+    resp.status(200).send(responseType);
+
+}
+
+
+
+// OTP related api here 
+
+const sendOtp = async (req, resp) => {
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    console.log(otp);
+    const phoneNumber = req.body.phoneNumber;
+    var responseType = {
+        message: 'ok',
+
     }
     resp.status(200).send(responseType);
 }
 
 
+const verifyOtp = async (req, resp) => {
+    const otp = req.body.otp;
+    const phoneNumber = req.body.phoneNumber;
+    var responseType = {
+        message: 'ok',
 
+    }
+    resp.status(200).send(responseType);
+}
 
+// payment apis //
+
+const checkOut = async (req, resp) => {
+    var responseType = {
+        message: 'ok',
+
+    }
+    var options = {
+        amount: Number(req.body.amount * 100),
+        currency: "INR",
+        // receipt: "order_rcptid_11"
+    };
+    const order = await instance.orders.create(options);
+
+    if (order) {
+        responseType.message = 'Get data succesfull';
+        responseType.status = 200;
+        responseType.result = order;
+
+    }
+    resp.status(200).send(responseType);
+};
+
+const paymentVerification = async (req, resp) => {
+    const _id = req.params.id;
+    const user = await Users.paymentdetail.findById(_id);
+    var responseType = {
+        message: 'ok',
+
+    }
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
+        req.body.data;
+
+    const body = razorpay_order_id + "|" + razorpay_payment_id;
+    var expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_API_SECRET)
+    .update(body.toString())
+    .digest('hex');
+
+    const isAuthentic = expectedSignature === razorpay_signature;
+
+    if(isAuthentic){
+        user.push( {paymentid : razorpay_payment_id, orderid : razorpay_order_id });
+        responseType.message = 'payment succesfully verified';
+        responseType.status = 200;
+        responseType.result = isAuthentic;
+    }else{
+        responseType.message = 'payment is not Correct ';
+        responseType.status = 400;
+        responseType.result = isAuthentic;
+        
+    }
+  console.log(user);
+    resp.status(200).send(responseType);
+};
 
 module.exports = {
     userList,
@@ -162,5 +276,12 @@ module.exports = {
     userLogin,
     userUpdate,
     userData,
-    userServiceList
+    userServiceList,
+    userInstallationList,
+    userPaymentList,
+    sendOtp,
+    verifyOtp,
+    checkOut,
+    paymentVerification
+
 }

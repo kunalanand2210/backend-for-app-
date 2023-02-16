@@ -5,6 +5,12 @@ var jwt = require('jsonwebtoken');
 
 const paymentdetailSchema = new mongoose.Schema({
     payments:Array,
+    userId:String,
+    serviceId:String,
+    status:String,
+    paymentid:String,
+    orderid:String
+    
 });
 
 const paymentdetail = mongoose.model('paymentdetail', paymentdetailSchema);
@@ -24,7 +30,7 @@ const dataSchema = new mongoose.Schema({
     productname:String,
     complaint_type:String,
     warranty:String,
-    purchase_date:Date,
+    purchase_date:String,
     set_serialno:String,
     query:String,
     invoice:Array,
@@ -85,7 +91,8 @@ userSchema.methods.getAuthToken = async function(data){
     let params = {
         id:this._id,
         email:this.email,
-        mobile:this.mobile
+        mobile:this.mobile,
+        name:this.name
     }
     var tokenValue = jwt.sign(params, process.env.SECRETKEY,{expiresIn:'300000s'});
     this.tokens = this.tokens.concat({token:tokenValue})
