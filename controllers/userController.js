@@ -219,29 +219,26 @@ const verifyOtp = async (req, resp) => {
 const mailer = async (email, otp) =>{
     let nodemailer = require('nodemailer');
     let transporter = nodemailer.createTransport({
-        service: "gmail",
+        service: "smtp.gmail.com",
         port: 587,
         secure: false, // true for 465, false for other ports
         auth: {
-          user: 'himanshuaggarwal507@gmail.com', // generated ethereal user
-          pass: 'sourabh@123', // generated ethereal password
+          user: 'sourabh999pal@gmail.com', // generated ethereal user
+          pass: 'wgizpuajhsuwqwdk', // generated ethereal password
         },
       }); 
 
       let info = await transporter.sendMail({
-        from: 'himanshuaggarwal507@gmail.com', // sender address
-        to: 'sourabh999pal@gmail.com', // list of receivers
+        from: 'sourabh999pal@gmail.com', // sender address
+        to: 'donnybangaji@gmail.com', // list of receivers
         subject: "Otp verification registration", // Subject line
-        text: `your Otp is :${otp}`, // plain text body
+        text: `your Otp is :26t67`, // plain text body
        
       });
 
 }
 
 
-
-
-  
 
 const emailOtpsend = async (req, resp) => {
     if (!req.body.email) {
