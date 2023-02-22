@@ -154,7 +154,7 @@ const serviceDetails = async (req, resp) => {
 const paymentdetailUpdate = async (req, resp) => {
     try {
         const data = req.body;
-        console.log(data);
+        
         const _id = req.params.id;
         var responseType = {
             message: 'ok'
@@ -162,7 +162,7 @@ const paymentdetailUpdate = async (req, resp) => {
         const user = await Users.data.findById(_id);
 
 
-        paymentdetail = new Users.paymentdetail({payments:data.formValues , userId : data.userid , serviceId : _id });
+        paymentdetail = new Users.paymentdetail({payments:data.formValues , userId : data.userid , serviceId : _id , status:'incompleted'});
         paymentdetail_id = paymentdetail._id;
         user.payment_details.push({ payment_detailid : paymentdetail_id});
         const response = await paymentdetail.save();

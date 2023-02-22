@@ -15,6 +15,16 @@ const paymentdetailSchema = new mongoose.Schema({
 
 const paymentdetail = mongoose.model('paymentdetail', paymentdetailSchema);
 
+const otpSchema = new mongoose.Schema({
+    email:String,
+    code:String,
+    expiresIn:Number  
+},{
+    timestamps:true
+});
+
+const otp = mongoose.model('otp', otpSchema , 'otp');
+
 const dataSchema = new mongoose.Schema({
     firstname:String,
     lastname:String,
@@ -101,4 +111,4 @@ userSchema.methods.getAuthToken = async function(data){
 }
 
 let users = conn.model('users',userSchema)
-module.exports = {users, data, paymentdetail};
+module.exports = {users, data, paymentdetail, otp};

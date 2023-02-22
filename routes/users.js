@@ -36,6 +36,10 @@ router.post('/add', userCtrl.userAdd);
 
 router.post('/sendotp', userCtrl.sendOtp);
 
+router.post('/emailsendotp', userCtrl.emailOtpsend);
+
+router.post('/changepassword', userCtrl.changepassword);
+
 router.post('/verifyotp', userCtrl.verifyOtp);
 
 router.post('/login',userCtrl.userLogin);

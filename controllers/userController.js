@@ -191,7 +191,7 @@ const userPaymentList = async (req, resp) => {
 
 
 
-// OTP related api here 
+// mobile OTP related api here 
 
 const sendOtp = async (req, resp) => {
     const otp = Math.floor(1000 + Math.random() * 9000);
@@ -214,6 +214,108 @@ const verifyOtp = async (req, resp) => {
     }
     resp.status(200).send(responseType);
 }
+// Email OTP related api here
+
+const mailer = async (email, otp) =>{
+    let nodemailer = require('nodemailer');
+    let transporter = nodemailer.createTransport({
+        service: "gmail",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+          user: 'himanshuaggarwal507@gmail.com', // generated ethereal user
+          pass: 'sourabh@123', // generated ethereal password
+        },
+      }); 
+
+      let info = await transporter.sendMail({
+        from: 'himanshuaggarwal507@gmail.com', // sender address
+        to: 'sourabh999pal@gmail.com', // list of receivers
+        subject: "Otp verification registration", // Subject line
+        text: `your Otp is :${otp}`, // plain text body
+       
+      });
+
+}
+
+
+
+
+  
+
+const emailOtpsend = async (req, resp) => {
+    if (!req.body.email) {
+        resp.status(301).json({ message: 'Error! please enter email' });
+    }
+
+    let responseType = {
+        message: 'ok'
+    }
+    const email = req.body.email;
+    let data = await Users.users.findOne({ email: email });
+    if (data) {
+        const otp = Math.floor(1000 + Math.random() * 9000);
+        let otpdata = new Users.otp({
+            email: email,
+            code: otp,
+            expiresIn: new Date().getTime() + 300 * 1000
+        });
+        let response = await otpdata.save();
+        mailer(email, otp);
+        responseType.message = 'Success';
+        responseType.status = 200;
+        responseType.result = response;
+
+
+    } else {
+        responseType.message = 'Email is not registered';
+        responseType.status = 400;
+
+    }
+
+
+    resp.status(200).send(responseType);
+}
+
+const changepassword = async (req, resp) => {
+    if (!req.body.code || !req.body.password || !req.body.email){
+        resp.status(301).json({ message: 'Error! please enter email , password and Otp' });
+    }
+
+    let responseType = {
+        message: 'ok'
+    }
+    const password = req.body.password;
+    const code = req.body.code;
+    const email = req.body.email;
+    let data = await Users.otp.findOne({email:email,  code: code });
+    if (data) {
+       let currenttime = new Date().getTime();
+       let diff = data.expiresIn - currenttime;
+       if(diff < 0){
+        responseType.message = "token expire";
+        responseType.status = 400;
+       }else{
+        let user = await Users.users.findOne({email:email});
+        user.password = password;
+        user.save();
+        responseType.message = "password change succesfully";
+        responseType.status = 200;
+       }
+
+
+    } else {
+        responseType.message = "code or email is not correct";
+        responseType.status = 404;
+
+    }
+
+
+    resp.status(200).send(responseType);
+}
+
+
+
 
 // payment apis //
 
@@ -240,7 +342,7 @@ const checkOut = async (req, resp) => {
 
 const paymentVerification = async (req, resp) => {
     const _id = req.params.id;
-    const user = await Users.paymentdetail.findById(_id);
+
     var responseType = {
         message: 'ok',
 
@@ -250,23 +352,27 @@ const paymentVerification = async (req, resp) => {
 
     const body = razorpay_order_id + "|" + razorpay_payment_id;
     var expectedSignature = crypto.createHmac('sha256', process.env.RAZORPAY_API_SECRET)
-    .update(body.toString())
-    .digest('hex');
+        .update(body.toString())
+        .digest('hex');
 
     const isAuthentic = expectedSignature === razorpay_signature;
 
-    if(isAuthentic){
-        user.push( {paymentid : razorpay_payment_id, orderid : razorpay_order_id });
+    if (isAuthentic) {
+        let data = await Users.paymentdetail.findOneAndUpdate({ userId: _id }, { paymentid: razorpay_payment_id, orderid: razorpay_order_id, status: 'completed' });
+        let response = await data.save();
+
+        console.log(response);
+
         responseType.message = 'payment succesfully verified';
         responseType.status = 200;
         responseType.result = isAuthentic;
-    }else{
+    } else {
         responseType.message = 'payment is not Correct ';
         responseType.status = 400;
         responseType.result = isAuthentic;
-        
+
     }
-  console.log(user);
+
     resp.status(200).send(responseType);
 };
 
@@ -282,6 +388,8 @@ module.exports = {
     sendOtp,
     verifyOtp,
     checkOut,
-    paymentVerification
+    paymentVerification,
+    emailOtpsend,
+    changepassword
 
 }
