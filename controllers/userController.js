@@ -216,24 +216,33 @@ const verifyOtp = async (req, resp) => {
 }
 // Email OTP related api here
 
-const mailer = async (email, otp) =>{
-    let nodemailer = require('nodemailer');
-    let transporter = nodemailer.createTransport({
-        service: "smtp.gmail.com",
-        port: 587,
-        secure: false, // true for 465, false for other ports
-        auth: {
-          user: 'sourabh999pal@gmail.com', // generated ethereal user
-          pass: 'wgizpuajhsuwqwdk', // generated ethereal password
-        },
-      }); 
+const mailer = async (email, otp) => {
+   
 
-      let info = await transporter.sendMail({
-        from: 'sourabh999pal@gmail.com', // sender address
-        to: 'donnybangaji@gmail.com', // list of receivers
-        subject: "Otp verification registration", // Subject line
-        text: `your Otp is :26t67`, // plain text body
-       
+    const nodemailer = require('nodemailer');
+
+    const transporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        auth: {
+            user: process.env.OTPSENDACCOUNT,
+            pass: process.env.ACCOUNTPASS
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.OTPSENDACCOUNT,
+        to: email,
+        subject: 'Otp verify message',
+        text: `Your One time password (otp) is : ${otp}`
+      };
+      
+      transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
       });
 
 }
@@ -250,18 +259,19 @@ const emailOtpsend = async (req, resp) => {
     }
     const email = req.body.email;
     let data = await Users.users.findOne({ email: email });
+    const otp = Math.floor(1000 + Math.random() * 9000);
     if (data) {
-        const otp = Math.floor(1000 + Math.random() * 9000);
+       
         let otpdata = new Users.otp({
             email: email,
             code: otp,
             expiresIn: new Date().getTime() + 300 * 1000
         });
         let response = await otpdata.save();
-        mailer(email, otp);
-        responseType.message = 'Success';
-        responseType.status = 200;
-        responseType.result = response;
+    mailer(email, otp);
+    responseType.message = 'Success';
+    responseType.status = 200;
+    responseType.result = response;
 
 
     } else {
@@ -275,7 +285,7 @@ const emailOtpsend = async (req, resp) => {
 }
 
 const changepassword = async (req, resp) => {
-    if (!req.body.code || !req.body.password || !req.body.email){
+    if (!req.body.code || !req.body.password || !req.body.email) {
         resp.status(301).json({ message: 'Error! please enter email , password and Otp' });
     }
 
@@ -285,20 +295,20 @@ const changepassword = async (req, resp) => {
     const password = req.body.password;
     const code = req.body.code;
     const email = req.body.email;
-    let data = await Users.otp.findOne({email:email,  code: code });
+    let data = await Users.otp.findOne({ email: email, code: code });
     if (data) {
-       let currenttime = new Date().getTime();
-       let diff = data.expiresIn - currenttime;
-       if(diff < 0){
-        responseType.message = "token expire";
-        responseType.status = 400;
-       }else{
-        let user = await Users.users.findOne({email:email});
-        user.password = password;
-        user.save();
-        responseType.message = "password change succesfully";
-        responseType.status = 200;
-       }
+        let currenttime = new Date().getTime();
+        let diff = data.expiresIn - currenttime;
+        if (diff < 0) {
+            responseType.message = "token expire";
+            responseType.status = 400;
+        } else {
+            let user = await Users.users.findOne({ email: email });
+            user.password = password;
+            user.save();
+            responseType.message = "password change succesfully";
+            responseType.status = 200;
+        }
 
 
     } else {
