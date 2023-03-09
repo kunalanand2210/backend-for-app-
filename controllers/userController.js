@@ -27,41 +27,46 @@ const userData = async (req, resp) => {
 }
 
 const userAdd = async (req, resp) => {
-    let { name, email, mobile, password } = req.body;
-    if (!email || !password || !name || !mobile) {
-        resp.status(400).json({ message: 'Error! please enter email ,password, name , mobile', status: 400 });
-
-
-    } else {
-        let user = await Users.users.findOne({ email: req.body.email });
-        var responseType = {
-            message: 'ok'
-        }
-        if (user) {
-            responseType.message = 'Error! Email is already in use.';
-            responseType.status = 403;
+    let { name, mobile, password, code } = req.body;
+    const email = req.body.email.toLowerCase();
+    var responseType = {
+        message: 'ok',
+    }
+    let data = await Users.otp.findOne({ email: email, code: code });
+    if (data) {
+        let currenttime = new Date().getTime();
+        let diff = data.expiresIn - currenttime;
+        if (diff < 0) {
+            responseType.message = "token expire";
+            responseType.status = 400;
         } else {
             let data = new Users.users({
                 name,
-                // email : req.body.email, we also call this way if name is different 
                 email,
                 mobile,
                 password
             });
+        
             let response = await data.save();
             responseType.message = 'Register Succesfully ';
             responseType.status = 200;
         }
-        resp.status(responseType.status).json(responseType);
-    }
 
+
+    } else {
+        responseType.message = "code or email is not correct";
+        responseType.status = 404;
+
+    }
+    resp.status(responseType.status).send(responseType);
 }
 
 const userLogin = async (req, resp) => {
     if (!req.body.email || !req.body.password) {
         resp.status(301).json({ message: 'Error! please enter email and password' });
     }
-    let user = await Users.users.findOne({ email: req.body.email });
+    const email = req.body.email.toLowerCase();
+    let user = await Users.users.findOne({ email: email });
 
     var responseType = {
         message: 'ok'
@@ -81,6 +86,39 @@ const userLogin = async (req, resp) => {
     } else {
         responseType.message = 'Invalid Email id';
         responseType.status = 404;
+    }
+    resp.status(responseType.status).json({ message: 'ok', data: responseType });
+
+
+}
+
+// google login add data and login //
+
+const googleLogin = async (req, resp) => {
+    let { name, email } = req.body;
+
+    let user = await Users.users.findOne({ email: email });
+
+    var responseType = {
+        message: 'ok'
+    }
+    if (user) {
+
+        let myToken = await user.getAuthToken();
+        responseType.message = 'Login Successfully';
+        responseType.token = myToken;
+        responseType.status = 200;
+
+    } else {
+        let data = new Users.users({
+            name,
+            email
+        });
+        let response = await data.save();
+        let myToken = await data.getAuthToken();
+        responseType.message = 'Register and Login Succesfully ';
+        responseType.token = myToken;
+        responseType.status = 201;
     }
     resp.status(responseType.status).json({ message: 'ok', data: responseType });
 
@@ -217,13 +255,14 @@ const verifyOtp = async (req, resp) => {
 // Email OTP related api here
 
 const mailer = async (email, otp) => {
-   
+    let status = 200;
 
     const nodemailer = require('nodemailer');
 
     const transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        secure: false,
         auth: {
             user: process.env.OTPSENDACCOUNT,
             pass: process.env.ACCOUNTPASS
@@ -235,15 +274,17 @@ const mailer = async (email, otp) => {
         to: email,
         subject: 'Otp verify message',
         text: `Your One time password (otp) is : ${otp}`
-      };
-      
-      transporter.sendMail(mailOptions, (error, info) => {
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
         if (error) {
-          console.log(error);
+            console.log(error);
+
         } else {
-          console.log('Email sent: ' + info.response);
+            console.log('Email sent: ' + info.response);
+
         }
-      });
+    });
 
 }
 
@@ -257,21 +298,21 @@ const emailOtpsend = async (req, resp) => {
     let responseType = {
         message: 'ok'
     }
-    const email = req.body.email;
+    const email = req.body.email.toLowerCase();
     let data = await Users.users.findOne({ email: email });
     const otp = Math.floor(1000 + Math.random() * 9000);
     if (data) {
-       
+
         let otpdata = new Users.otp({
             email: email,
             code: otp,
             expiresIn: new Date().getTime() + 300 * 1000
         });
         let response = await otpdata.save();
-    mailer(email, otp);
-    responseType.message = 'Success';
-    responseType.status = 200;
-    responseType.result = response;
+        mailer(email, otp);
+        responseType.message = 'Success';
+        responseType.status = 200;
+        responseType.result = response;
 
 
     } else {
@@ -284,6 +325,37 @@ const emailOtpsend = async (req, resp) => {
     resp.status(200).send(responseType);
 }
 
+const registerOtp = async (req, resp) => {
+
+    let responseType = {
+        message: 'ok'
+    }
+    const email = req.body.email.toLowerCase();
+    let data = await Users.users.findOne({ email: email });
+    const otp = Math.floor(1000 + Math.random() * 9000);
+    if (data) {
+        responseType.message = 'Email is already registered';
+        responseType.status = 400;
+
+    } else {
+
+        let otpdata = new Users.otp({
+            email: email,
+            code: otp,
+            expiresIn: new Date().getTime() + 300 * 1000
+        });
+        let response = await otpdata.save();
+        mailer(email, otp);
+        responseType.message = 'Success';
+        responseType.status = 200;
+        responseType.result = response;
+    }
+
+    resp.status(responseType.status).send(responseType);
+}
+
+
+
 const changepassword = async (req, resp) => {
     if (!req.body.code || !req.body.password || !req.body.email) {
         resp.status(301).json({ message: 'Error! please enter email , password and Otp' });
@@ -294,7 +366,7 @@ const changepassword = async (req, resp) => {
     }
     const password = req.body.password;
     const code = req.body.code;
-    const email = req.body.email;
+    const email = req.body.email.toLowerCase();
     let data = await Users.otp.findOne({ email: email, code: code });
     if (data) {
         let currenttime = new Date().getTime();
@@ -397,6 +469,8 @@ module.exports = {
     checkOut,
     paymentVerification,
     emailOtpsend,
-    changepassword
+    changepassword,
+    googleLogin,
+    registerOtp
 
 }

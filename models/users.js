@@ -4,6 +4,8 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 
 const paymentdetailSchema = new mongoose.Schema({
+    name:String,
+    email:String,
     payments:Array,
     userId:String,
     serviceId:String,
@@ -101,7 +103,6 @@ userSchema.methods.getAuthToken = async function(data){
     let params = {
         id:this._id,
         email:this.email,
-        mobile:this.mobile,
         name:this.name
     }
     var tokenValue = jwt.sign(params, process.env.SECRETKEY,{expiresIn:'300000s'});

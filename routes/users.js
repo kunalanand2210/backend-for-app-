@@ -34,9 +34,13 @@ router.get('/userpayment/:id', userCtrl.userPaymentList);
 
 router.post('/add', userCtrl.userAdd);
 
+router.post('/googlelogin',userCtrl.googleLogin);
+
 router.post('/sendotp', userCtrl.sendOtp);
 
 router.post('/emailsendotp', userCtrl.emailOtpsend);
+
+router.post('/registerotp', userCtrl.registerOtp);
 
 router.post('/changepassword', userCtrl.changepassword);
 

@@ -26,8 +26,16 @@ router.post('/login', adminCtrl.adminLogin);
 
 router.delete('/delete/:id', passport.authenticate('jwt',{session:false}), adminCtrl.adminDelete);
 
-router.post('/paymentdetail/:id', passport.authenticate('jwt',{session:false}), adminCtrl.paymentdetailUpdate);
+router.post('/paymentupdate/:id', passport.authenticate('jwt',{session:false}), adminCtrl.paymentdetailUpdate);
 
 router.get('/servicedetail/:id', adminCtrl.serviceDetails);
+
+// api for dashboard page (for some quick information)
+router.get('/dashboarddata', adminCtrl.dashboardData);
+
+router.get('/paymentlist',  adminCtrl.paymentList);
+
+router.get('/paymentdetail/:id',  adminCtrl.paymentDetail);
+
 
 module.exports = router;
