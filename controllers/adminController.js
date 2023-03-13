@@ -158,7 +158,7 @@ const paymentdetailUpdate = async (req, resp) => {
 
         const userdetail = await Users.users.findById(data.userid);
 
-        paymentdetail = new Users.paymentdetail({ payments: data.formValues, userId: data.userid, serviceId: _id, name: userdetail.name, email: userdetail.email, status: 'incompleted' });
+        paymentdetail = new Users.paymentdetail({ payments: data.formValues, userId: data.userid, serviceId: _id, name: userdetail.name, email: userdetail.email, status: 'payment incompleted' });
         paymentdetail_id = paymentdetail._id;
         user.payment_details.push({ payment_detailid: paymentdetail_id });
         const response = await paymentdetail.save();

@@ -9,6 +9,7 @@ const instance = require('../files/razorPayinstance');
 const userList = async (req, resp) => {
     let data = await Users.users.find();
     resp.json(data);
+    
 }
 
 const userData = async (req, resp) => {
@@ -437,7 +438,7 @@ const paymentVerification = async (req, resp) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-        let data = await Users.paymentdetail.findOneAndUpdate({ userId: _id }, { paymentid: razorpay_payment_id, orderid: razorpay_order_id, status: 'completed' });
+        let data = await Users.paymentdetail.findOneAndUpdate({ userId: _id }, { paymentid: razorpay_payment_id, orderid: razorpay_order_id, status: 'payment completed' });
         let response = await data.save();
 
         console.log(response);
