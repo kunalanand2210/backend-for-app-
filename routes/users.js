@@ -9,11 +9,6 @@ const upload = require('../middleware/multer');
 var passport = require('passport');
 require('../middleware/passport')(passport)
 
-var bodyParser = require('body-parser')
-
-router.use(bodyParser.urlencoded({extended:false}));
-
-
 router.get('/', (req , resp)=>{
   resp.send('hello')
 });
@@ -53,10 +48,22 @@ router.post('/checkout',userCtrl.checkOut);
 router.post('/paymentverfication/:id',userCtrl.paymentVerification);
 
 
-const cpUpload = upload.upload.fields([{ name: 'invoice', maxCount: 1 }, { name: 'issue_image', maxCount: 4 }, { name: 'under_warranty', maxCount: 1 }])
-router.post('/update/:id', cpUpload , userCtrl.userUpdate);
+// const cpUpload = upload.upload.fields([{ name: 'invoice', maxCount: 1 }, { name: 'issue_image', maxCount: 4 }, { name: 'under_warranty', maxCount: 1 }])
+// router.post('/update/:id', cpUpload , userCtrl.userUpdate);
 
 // router.post('/update', upload.upload , userCtrl.userUpdate);
+
+router.post('/detailupdate/:id',   userCtrl.userdetailUpdate);
+
+router.post('/invoiceupdate/:id', upload.upload.single('invoice') , userCtrl.userinvoiceUpdate);
+
+router.post('/warrantyupdate/:id', upload.upload.single('under_warranty') , userCtrl.userwarrantyUpdate);
+
+router.post('/issueimgupdate/:id', upload.upload.array('issue_image', 4) , userCtrl.userissueimgUpdate);
+
+
+
+
 
 
 module.exports = router;

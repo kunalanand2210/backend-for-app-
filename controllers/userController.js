@@ -9,7 +9,7 @@ const instance = require('../files/razorPayinstance');
 const userList = async (req, resp) => {
     let data = await Users.users.find();
     resp.json(data);
-    
+
 }
 
 const userData = async (req, resp) => {
@@ -47,7 +47,7 @@ const userAdd = async (req, resp) => {
                 mobile,
                 password
             });
-        
+
             let response = await data.save();
             responseType.message = 'Register Succesfully ';
             responseType.status = 200;
@@ -126,11 +126,60 @@ const googleLogin = async (req, resp) => {
 
 }
 
-const userUpdate = async (req, resp) => {
+// const userUpdate = async (req, resp) => {
+//     try {
+
+//         const data = req.files;
+//         console.log(data);
+//         const { firstname, lastname, mobile, altmobile, email, address, city, state, pincode, brand, productname, complaint_type, warranty, purchase_date, set_serialno, query } = req.body;
+//         console.log(req.body);
+//         const _id = req.params.id;
+//         const user = await Users.users.findById(_id);
+//         var responseType = {
+//             message: 'ok'
+//         }
+
+//         let imagedata = new Users.data({
+//             invoice: data['invoice'],
+//             issue_image: data['issue_image'],
+//             under_warranty: data['under_warranty'],
+//             firstname: firstname,
+//             lastname: lastname,
+//             mobile: mobile,
+//             altmobile: altmobile,
+//             email: email,
+//             address: address, city: city, state: state, pincode: pincode,
+//             brand: brand,
+//             productname: productname,
+//             complaint_type: complaint_type,
+//             warranty: warranty,
+//             purchase_date: purchase_date,
+//             set_serialno: set_serialno,
+//             query: query,
+//             userId: _id,
+//         })
+
+//         const imagedata_id = imagedata._id;
+//         user.datas.push({ data: imagedata_id });
+//         const response = await imagedata.save();
+//         const result = await user.save();
+
+//         if (response) {
+//             responseType.status = 200;
+//             responseType.id = imagedata_id;
+//         }
+//         resp.status(200).send(responseType);
+
+//     } catch (e) {
+//         resp.send(e);
+//     }
+
+// }
+
+
+const userdetailUpdate = async (req, resp) => {
     try {
 
-        const data = req.files;
-        console.log(data);
         const { firstname, lastname, mobile, altmobile, email, address, city, state, pincode, brand, productname, complaint_type, warranty, purchase_date, set_serialno, query } = req.body;
         console.log(req.body);
         const _id = req.params.id;
@@ -140,9 +189,7 @@ const userUpdate = async (req, resp) => {
         }
 
         let imagedata = new Users.data({
-            invoice: data['invoice'],
-            issue_image: data['issue_image'],
-            under_warranty: data['under_warranty'],
+            
             firstname: firstname,
             lastname: lastname,
             mobile: mobile,
@@ -174,9 +221,83 @@ const userUpdate = async (req, resp) => {
         resp.send(e);
     }
 
+}
 
+
+const userwarrantyUpdate = async (req, resp) => {
+    try {
+
+        const data = req.file;
+        
+        const _id = req.params.id;
+        
+        var responseType = {
+            message: 'ok'
+        }
+        const serviceData = await Users.data.findById(_id);
+        serviceData.under_warranty = data;
+    
+        serviceData.save();
+
+        responseType.status = 200;
+       
+
+        resp.status(responseType.status).send(responseType);
+
+    } catch (e) {
+        resp.send(e);
+    }
 
 }
+
+const userissueimgUpdate = async (req, resp) => {
+    try {
+
+        const data = req.files;
+        console.log(data);
+        const _id = req.params.id;
+        
+        var responseType = {
+            message: 'ok'
+        }
+        const serviceData = await Users.data.findById(_id);
+        serviceData.issue_image = data;
+        serviceData.save();
+
+        responseType.status = 200;
+
+        resp.status(responseType.status).send(responseType);
+
+    } catch (e) {
+        resp.send(e);
+    }
+
+}
+
+const userinvoiceUpdate = async (req, resp) => {
+    try {
+
+        const data = req.file;
+        console.log(data);
+        const _id = req.params.id;
+        
+        var responseType = {
+            message: 'ok'
+        }
+        const serviceData = await Users.data.findById(_id);
+        serviceData.invoice = data;
+        serviceData.save();
+
+        responseType.status = 200;
+
+        resp.status(responseType.status).send(responseType);
+
+    } catch (e) {
+        resp.send(e);
+    }
+
+}
+
 
 const userServiceList = async (req, resp) => {
     const _id = req.params.id;
@@ -460,7 +581,7 @@ module.exports = {
     userList,
     userAdd,
     userLogin,
-    userUpdate,
+    // userUpdate,
     userData,
     userServiceList,
     userInstallationList,
@@ -472,6 +593,10 @@ module.exports = {
     emailOtpsend,
     changepassword,
     googleLogin,
-    registerOtp
+    registerOtp,
+    userinvoiceUpdate,
+    userdetailUpdate,
+    userwarrantyUpdate,
+    userissueimgUpdate,
 
 }

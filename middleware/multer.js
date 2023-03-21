@@ -5,8 +5,11 @@ const fs = require('fs');
 const upload = multer({
     storage: multer.diskStorage({
         destination: async (req, file, cb) => {
-            const _id = req.params.id;
+            const userid = req.params.id;
+            const _id = (await User.data.findById(userid)).userId;
+           
             const name = (await User.users.findById(_id).select('-password -tokens -email -datas -_id -mobile -createdAt -updatedAt -__v')).name; 
+            
             var dir = './public/uploads/'+name+_id;
             if (!fs.existsSync(dir)){
               fs.mkdirSync(dir);
