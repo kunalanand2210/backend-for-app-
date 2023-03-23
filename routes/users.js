@@ -47,6 +47,7 @@ router.post('/checkout',userCtrl.checkOut);
 
 router.post('/paymentverfication/:id',userCtrl.paymentVerification);
 
+router.post('/pdfget/:id', userCtrl.pdfGet);
 
 // const cpUpload = upload.upload.fields([{ name: 'invoice', maxCount: 1 }, { name: 'issue_image', maxCount: 4 }, { name: 'under_warranty', maxCount: 1 }])
 // router.post('/update/:id', cpUpload , userCtrl.userUpdate);
@@ -54,6 +55,8 @@ router.post('/paymentverfication/:id',userCtrl.paymentVerification);
 // router.post('/update', upload.upload , userCtrl.userUpdate);
 
 router.post('/detailupdate/:id',   userCtrl.userdetailUpdate);
+
+
 
 router.post('/invoiceupdate/:id', upload.upload.single('invoice') , userCtrl.userinvoiceUpdate);
 

@@ -11,7 +11,15 @@ const paymentdetailSchema = new mongoose.Schema({
     serviceId:String,
     status:String,
     paymentid:String,
-    orderid:String
+    orderid:String,
+
+    paymentdate:Date,
+    address:String,
+    city:String,
+    state:String,
+    pincode:String,
+    totalpay:String,
+    
     
 });
 

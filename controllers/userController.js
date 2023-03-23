@@ -6,6 +6,10 @@ const crypto = require("crypto");
 
 const instance = require('../files/razorPayinstance');
 
+var pdf = require("pdf-creator-node");
+var fs = require("fs");
+var html = fs.readFileSync("./files/index.html", "utf8");
+
 const userList = async (req, resp) => {
     let data = await Users.users.find();
     resp.json(data);
@@ -189,7 +193,7 @@ const userdetailUpdate = async (req, resp) => {
         }
 
         let imagedata = new Users.data({
-            
+
             firstname: firstname,
             lastname: lastname,
             mobile: mobile,
@@ -228,19 +232,19 @@ const userwarrantyUpdate = async (req, resp) => {
     try {
 
         const data = req.file;
-        
+
         const _id = req.params.id;
-        
+
         var responseType = {
             message: 'ok'
         }
         const serviceData = await Users.data.findById(_id);
         serviceData.under_warranty = data;
-    
+
         serviceData.save();
 
         responseType.status = 200;
-       
+
 
         resp.status(responseType.status).send(responseType);
 
@@ -256,7 +260,7 @@ const userissueimgUpdate = async (req, resp) => {
         const data = req.files;
         console.log(data);
         const _id = req.params.id;
-        
+
         var responseType = {
             message: 'ok'
         }
@@ -280,7 +284,7 @@ const userinvoiceUpdate = async (req, resp) => {
         const data = req.file;
         console.log(data);
         const _id = req.params.id;
-        
+
         var responseType = {
             message: 'ok'
         }
@@ -395,7 +399,16 @@ const mailer = async (email, otp) => {
         from: process.env.OTPSENDACCOUNT,
         to: email,
         subject: 'Otp verify message',
-        text: `Your One time password (otp) is : ${otp}`
+        html: `<div style="padding:50px;background:#eee;">
+            <div style="padding:40px;background:#fff; font-weight:500;">
+                <p style="font-weight:500;font-size:16px;">Dear User,</p>
+
+                <p style="font-weight:500;font-size:16px;">Kindly note that the One Time Password (OTP) for your application request is <b> ${otp}</b>.
+                Please note that this OTP is valid for the next 5 minutes, only.
+                This is an auto generated e-mail. Please do not reply.</p>
+                <p style="font-weight:500;font-size:16px;">Sincerely</p>
+            </div>
+        </div>`
     };
 
     transporter.sendMail(mailOptions, (error, info) => {
@@ -559,7 +572,9 @@ const paymentVerification = async (req, resp) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-        let data = await Users.paymentdetail.findOneAndUpdate({ userId: _id }, { paymentid: razorpay_payment_id, orderid: razorpay_order_id, status: 'payment completed' });
+        let today = new Date();
+        console.log(today);
+        let data = await Users.paymentdetail.findOneAndUpdate({ userId: _id }, { paymentid: razorpay_payment_id, orderid: razorpay_order_id, status: 'payment completed' , paymentdate: today});
         let response = await data.save();
 
         console.log(response);
@@ -576,6 +591,85 @@ const paymentVerification = async (req, resp) => {
 
     resp.status(200).send(responseType);
 };
+
+const pdfGet = async (req, resp) => {
+    let options = {
+        format: "A4",
+        orientation: "portrait",
+        // border: "5mm",
+        // header: {
+        //     height: "30mm",
+        //     // contents: '<div style="text-align: center;">Author: Shyam Hajare</div>'
+        // },
+        // footer: {
+        //     height: "28mm",
+        //     contents: {
+        //         first: 'Cover page',
+               
+        //         default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
+        //         last: 'Last Page'
+        //     }
+        // }
+    };
+
+    // let users = await Users.paymentdetail.find();
+
+ 
+    var users = [
+        {
+            name: "Shyam",
+            email: "sourabh999pal@gmail.com",
+            payments:[
+                {
+                    name : 'remote',
+                    price : '70',
+                },
+                {
+                    name : 'remote2',
+                    price : '72',
+                },
+            ],
+            total: "5252",
+            userfirstaddress: "lorem lorem 1",
+            usersecondaddress: "lorem lorem 2",
+            userthirdaddress: "lorem lorem 3",
+            paymentdate: "20-10-2022",
+            paymentid: "hasuihxjzgjhg87684654564",
+            status:'payment incompleted',
+
+        },
+        
+    ];
+    console.log(users);
+
+    var document = {
+        html: html,
+        data: {
+            users: users,
+        },
+        path: "./output.pdf",
+        type: "",
+    };
+
+    pdf
+        .create(document, options)
+        .then((res) => {
+            console.log(res);
+        })
+        .catch((error) => {
+            console.error(error);
+        });
+    const _id = req.params.id
+
+    var responseType = {
+        message: 'ok',
+
+    }
+    responseType.status = 200;
+
+
+    resp.status(responseType.status).send(responseType);
+}
 
 module.exports = {
     userList,
@@ -598,5 +692,6 @@ module.exports = {
     userdetailUpdate,
     userwarrantyUpdate,
     userissueimgUpdate,
+    pdfGet
 
 }

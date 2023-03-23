@@ -149,6 +149,18 @@ const paymentdetailUpdate = async (req, resp) => {
     try {
         const data = req.body;
 
+        const extravalue = (res) => {
+            let price = 0;
+            let data = res;
+            let datalength = data.length;
+            for (let j = 0; j < datalength; j++) {
+        
+              price = price + parseInt(data[j].price);
+            }
+        
+            return price
+          }
+
         const _id = req.params.id;
 
         var responseType = {
@@ -158,7 +170,7 @@ const paymentdetailUpdate = async (req, resp) => {
 
         const userdetail = await Users.users.findById(data.userid);
 
-        paymentdetail = new Users.paymentdetail({ payments: data.formValues, userId: data.userid, serviceId: _id, name: userdetail.name, email: userdetail.email, status: 'payment incompleted' });
+        paymentdetail = new Users.paymentdetail({ payments: data.formValues, userId: data.userid, serviceId: _id, name: userdetail.name, email: userdetail.email, address:user.address, state: user.state, city:user.city, pincode:user.pincode, status: 'payment incompleted' , totalpay:extravalue(data.formValues)});
         paymentdetail_id = paymentdetail._id;
         user.payment_details.push({ payment_detailid: paymentdetail_id });
         const response = await paymentdetail.save();
@@ -294,5 +306,6 @@ module.exports = {
     paymentDelete,
     dashboardData,
     paymentList,
-    paymentDetail
+    paymentDetail,
+ 
 }
