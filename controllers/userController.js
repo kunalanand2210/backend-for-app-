@@ -572,9 +572,19 @@ const paymentVerification = async (req, resp) => {
     const isAuthentic = expectedSignature === razorpay_signature;
 
     if (isAuthentic) {
-        let today = new Date();
+
+        let todaydate = new Date();
+        let yyyy = todaydate.getFullYear();
+        let mm = todaydate.getMonth() + 1; // Months start at 0!
+        let dd = todaydate.getDate();
+
+        if (dd < 10) dd = '0' + dd;
+        if (mm < 10) mm = '0' + mm;
+
+        let today = dd + '-' + mm + '-' + yyyy;
+
         console.log(today);
-        let data = await Users.paymentdetail.findOneAndUpdate({ userId: _id }, { paymentid: razorpay_payment_id, orderid: razorpay_order_id, status: 'payment completed' , paymentdate: today});
+        let data = await Users.paymentdetail.findByIdAndUpdate(_id, { paymentid: razorpay_payment_id, orderid: razorpay_order_id, status: 'payment completed', paymentdate: today });
         let response = await data.save();
 
         console.log(response);
@@ -593,6 +603,7 @@ const paymentVerification = async (req, resp) => {
 };
 
 const pdfGet = async (req, resp) => {
+
     let options = {
         format: "A4",
         orientation: "portrait",
@@ -605,49 +616,46 @@ const pdfGet = async (req, resp) => {
         //     height: "28mm",
         //     contents: {
         //         first: 'Cover page',
-               
+
         //         default: '<span style="color: #444;">{{page}}</span>/<span>{{pages}}</span>', // fallback value
         //         last: 'Last Page'
         //     }
         // }
     };
+    const _id = req.params.id
+    var responseType = {
+        message: 'ok',
 
-    // let users = await Users.paymentdetail.find();
+    }
 
- 
+    let userdata = await Users.paymentdetail.findById(_id);
+    let actualdata = await Users.users.findById(userdata.userId);
+
+
     var users = [
         {
-            name: "Shyam",
-            email: "sourabh999pal@gmail.com",
-            payments:[
-                {
-                    name : 'remote',
-                    price : '70',
-                },
-                {
-                    name : 'remote2',
-                    price : '72',
-                },
-            ],
-            total: "5252",
-            userfirstaddress: "lorem lorem 1",
-            usersecondaddress: "lorem lorem 2",
-            userthirdaddress: "lorem lorem 3",
-            paymentdate: "20-10-2022",
-            paymentid: "hasuihxjzgjhg87684654564",
-            status:'payment incompleted',
-
+            name: userdata.name,
+            email: userdata.email,
+            payments: userdata.payments,
+            total: userdata.totalpay,
+            userfirstaddress: userdata.address,
+            usersecondaddress: userdata.city + userdata.state,
+            userthirdaddress: userdata.pincode,
+            paymentdate: userdata.paymentdate,
+            paymentid: userdata.paymentid,
+            status: userdata.status,
+            serviceid: userdata.serviceId,
         },
-        
+
     ];
-    console.log(users);
+
 
     var document = {
         html: html,
         data: {
             users: users,
         },
-        path: "./output.pdf",
+        path: `./public/uploads/${actualdata.name + actualdata._id}/receipt.pdf`,
         type: "",
     };
 
@@ -655,20 +663,15 @@ const pdfGet = async (req, resp) => {
         .create(document, options)
         .then((res) => {
             console.log(res);
+            // responseType.status = 200;
+            // responseType.data = res.filename;
+            resp.status(200).send({status : 200 ,filename : `/public/uploads/${actualdata.name + actualdata._id}/receipt.pdf`});
         })
         .catch((error) => {
             console.error(error);
+            resp.status(400).send({status : 400 ,error});
         });
-    const _id = req.params.id
 
-    var responseType = {
-        message: 'ok',
-
-    }
-    responseType.status = 200;
-
-
-    resp.status(responseType.status).send(responseType);
 }
 
 module.exports = {

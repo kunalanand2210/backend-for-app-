@@ -13,7 +13,7 @@ const paymentdetailSchema = new mongoose.Schema({
     paymentid:String,
     orderid:String,
 
-    paymentdate:Date,
+    paymentdate:String,
     address:String,
     city:String,
     state:String,
