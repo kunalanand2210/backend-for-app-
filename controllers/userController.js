@@ -182,7 +182,6 @@ const googleLogin = async (req, resp) => {
 
 
 const userdetailUpdate = async (req, resp) => {
-    try {
 
         const { firstname, lastname, mobile, altmobile, email, address, city, state, pincode, brand, productname, complaint_type, warranty, purchase_date, set_serialno, query } = req.body;
         console.log(req.body);
@@ -218,88 +217,94 @@ const userdetailUpdate = async (req, resp) => {
         if (response) {
             responseType.status = 200;
             responseType.id = imagedata_id;
+        }else{
+            responseType.status = 400;
         }
-        resp.status(200).send(responseType);
+        resp.status(responseType.status).send(responseType);
 
-    } catch (e) {
-        resp.send(e);
-    }
+    
 
 }
 
 
 const userwarrantyUpdate = async (req, resp) => {
-    try {
-
-        const data = req.file;
-
-        const _id = req.params.id;
-
-        var responseType = {
-            message: 'ok'
-        }
-        const serviceData = await Users.data.findById(_id);
-        serviceData.under_warranty = data;
-
-        serviceData.save();
-
-        responseType.status = 200;
 
 
-        resp.status(responseType.status).send(responseType);
+    const data = req.file;
 
-    } catch (e) {
-        resp.send(e);
+    const _id = req.params.id;
+
+    var responseType = {
+        message: 'ok'
     }
+    const serviceData = await Users.data.findById(_id);
+    serviceData.under_warranty = data;
+
+    // serviceData.save();
+    if (!serviceData) {
+        resp.status(400).send({ status: 400, message: "User Data Not Found" });
+    }
+    else {
+        const response = await serviceData.save();
+        resp.status(200).send({ status: 200, message: "Uploaded", response });
+    }
+
+    // responseType.status = 200;
+
+
+    // resp.status(responseType.status).send(responseType);
 
 }
 
 const userissueimgUpdate = async (req, resp) => {
-    try {
-
-        const data = req.files;
-        console.log(data);
-        const _id = req.params.id;
-
-        var responseType = {
-            message: 'ok'
-        }
-        const serviceData = await Users.data.findById(_id);
-        serviceData.issue_image = data;
-        serviceData.save();
-
-        responseType.status = 200;
-
-        resp.status(responseType.status).send(responseType);
-
-    } catch (e) {
-        resp.send(e);
+    console.log(req.files);
+    if (!req.files) {
+        resp.status(400).send({ status: 400, message: "files not upload" });
     }
+    const data = req.files;
+    console.log(data);
+    const _id = req.params.id;
+
+    var responseType = {
+        message: 'ok'
+    }
+    const serviceData = await Users.data.findById(_id);
+    serviceData.issue_image = data;
+    // serviceData.save();
+    if (!serviceData) {
+        resp.status(400).send({ status: 400, message: "User Data Not Found" });
+    }
+    else {
+        const response = await serviceData.save();
+        resp.status(200).send({ status: 200, message: "Uploaded", response });
+    }
+    // responseType.status = 200;
+
+    // resp.status(responseType.status).send(responseType);
 
 }
 
 const userinvoiceUpdate = async (req, resp) => {
-    try {
 
+    console.log(req.file)
+    if (!req.file) {
+        resp.status(400).send({ status: 400, message: "file not upload" });
+    }
+    else {
         const data = req.file;
         console.log(data);
         const _id = req.params.id;
-
-        var responseType = {
-            message: 'ok'
-        }
         const serviceData = await Users.data.findById(_id);
         serviceData.invoice = data;
-        serviceData.save();
+        if (!serviceData) {
+            resp.status(400).send({ status: 400, message: "User Data Not Found" });
+        }
+        else {
+            const response = await serviceData.save();
+            resp.status(200).send({ status: 200, message: "Uploaded", response });
+        }
 
-        responseType.status = 200;
-
-        resp.status(responseType.status).send(responseType);
-
-    } catch (e) {
-        resp.send(e);
     }
-
 }
 
 
@@ -665,11 +670,11 @@ const pdfGet = async (req, resp) => {
             console.log(res);
             // responseType.status = 200;
             // responseType.data = res.filename;
-            resp.status(200).send({status : 200 ,filename : `/public/uploads/${actualdata.name + actualdata._id}/receipt.pdf`});
+            resp.status(200).send({ status: 200, filename: `/public/uploads/${actualdata.name + actualdata._id}/receipt.pdf` });
         })
         .catch((error) => {
             console.error(error);
-            resp.status(400).send({status : 400 ,error});
+            resp.status(400).send({ status: 400, error });
         });
 
 }
