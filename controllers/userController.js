@@ -55,6 +55,7 @@ const userAdd = async (req, resp) => {
             let response = await data.save();
             responseType.message = 'Register Succesfully ';
             responseType.status = 200;
+            msgMailer(email,subject='Congratulation !', msg='You registered Succesfully with this mail .');
         }
 
 
@@ -84,6 +85,7 @@ const userLogin = async (req, resp) => {
             responseType.message = 'Login Successfully';
             responseType.token = myToken;
             responseType.status = 200;
+            msgMailer(email,subject='Congratulation !', msg='You Login Succesfully in Sppl Service app .');
         } else {
             responseType.message = 'Wrong Password';
             responseType.status = 401;
@@ -385,7 +387,7 @@ const verifyOtp = async (req, resp) => {
 }
 // Email OTP related api here
 
-const mailer = async (email, otp) => {
+const otpMailer = async (email, otp) => {
     let status = 200;
 
     const nodemailer = require('nodemailer');
@@ -428,6 +430,48 @@ const mailer = async (email, otp) => {
 
 }
 
+const msgMailer = async (email, subject, msg ) => {
+   
+
+    const nodemailer = require('nodemailer');
+
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        secure: false,
+        auth: {
+            user: process.env.OTPSENDACCOUNT,
+            pass: process.env.ACCOUNTPASS
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.OTPSENDACCOUNT,
+        to: email,
+        subject: subject,
+        html: `<div style="padding:50px;background:#eee;">
+            <div style="padding:40px;background:#fff; font-weight:500;">
+                <p style="font-weight:500;font-size:16px;">Dear User,</p>
+
+                <p style="font-weight:500;font-size:16px;">${msg} <br/>
+                This is an auto generated e-mail. Please do not reply. </p>
+                <p style="font-weight:500;font-size:16px;">Sincerely</p>
+            </div>
+        </div>`
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.log(error);
+
+        } else {
+            console.log('Email sent: ' + info.response);
+
+        }
+    });
+
+}
+
 
 
 const emailOtpsend = async (req, resp) => {
@@ -449,7 +493,7 @@ const emailOtpsend = async (req, resp) => {
             expiresIn: new Date().getTime() + 300 * 1000
         });
         let response = await otpdata.save();
-        mailer(email, otp);
+        otpMailer(email, otp);
         responseType.message = 'Success';
         responseType.status = 200;
         responseType.result = response;
@@ -485,7 +529,7 @@ const registerOtp = async (req, resp) => {
             expiresIn: new Date().getTime() + 300 * 1000
         });
         let response = await otpdata.save();
-        mailer(email, otp);
+        otpMailer(email, otp);
         responseType.message = 'Success';
         responseType.status = 200;
         responseType.result = response;
