@@ -12,6 +12,7 @@ var adminSchema = new mongoose.Schema({
     name:String,
     email:String,
     usertype:String,
+    brand:String,
     password:{
         type:String,
         select:true
@@ -46,6 +47,7 @@ adminSchema.methods.getAuthToken = async function(data){
         id:this._id,
         email:this.email,
         role:this.usertype,
+        brand:this.brand,
     }
 
     var tokenValue = jwt.sign(params, process.env.SECRETKEY,{expiresIn:'300000s'});

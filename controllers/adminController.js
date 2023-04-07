@@ -4,9 +4,9 @@ const Users = require('../models/users');
 var bcrypt = require('bcryptjs');
 
 const adminAdd = async (req, resp) => {
-    let { name, email, password, usertype } = req.body;
+    let { name, email, password, usertype, brand } = req.body;
 
-    if (!email || !password || !name || !usertype) {
+    if (!email || !password || !name || !usertype || !brand) {
         resp.status(400).json({ message: 'Error! please enter email and password', status: 400 });
 
 
@@ -23,7 +23,7 @@ const adminAdd = async (req, resp) => {
                 name,
                 email,
                 password,
-                usertype
+                usertype, brand
             });
             let response = await data.save()
             // let myToken = await data.getAuthToken();

@@ -3,8 +3,6 @@ const app = express();
 
 const bodyParser = require('body-parser');
 
-
-
 var cors = require('cors');
 app.use(cors());
 
@@ -27,10 +25,14 @@ const userRoute = require('./routes/users');
 
 const adminRoute = require('./routes/admins');
 
+const productRoute = require('./routes/products');
+
 
 app.use('/users',userRoute)
 
 app.use('/admins',adminRoute)
+
+app.use('/products',productRoute)
 
 
 app.use("/public", express.static(path.join(__dirname, 'public')));
