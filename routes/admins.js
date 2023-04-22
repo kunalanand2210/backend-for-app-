@@ -16,7 +16,13 @@ router.post('/add', passport.authenticate('jwt',{session:false}), adminCtrl.admi
 
 router.get('/list', passport.authenticate('jwt',{session:false}), adminCtrl.adminList);
 
-router.get('/service', adminCtrl.adminServiceList);
+router.get('/list/:id',passport.authenticate('jwt',{session:false}), adminCtrl.adminListId);
+
+router.get('/service/:brand', adminCtrl.adminServiceList);
+
+router.post('/servicestatus/:id', adminCtrl.serviceStatus);
+
+router.get('/adminservicerecord/:id', adminCtrl.adminServiceRecord);
 
 router.post('/paymentdelete/:id', adminCtrl.paymentDelete);
 
@@ -24,7 +30,7 @@ router.get('/installation', adminCtrl.adminInstallationList);
 
 router.post('/login', adminCtrl.adminLogin);
 
-router.delete('/delete/:id', passport.authenticate('jwt',{session:false}), adminCtrl.adminDelete);
+router.put('/edit/:id', passport.authenticate('jwt',{session:false}), adminCtrl.adminEdit);
 
 router.post('/paymentupdate/:id', passport.authenticate('jwt',{session:false}), adminCtrl.paymentdetailUpdate);
 
@@ -36,6 +42,8 @@ router.get('/dashboarddata', adminCtrl.dashboardData);
 router.get('/paymentlist',  adminCtrl.paymentList);
 
 router.get('/paymentdetail/:id',  adminCtrl.paymentDetail);
+
+
 
 
 module.exports = router;

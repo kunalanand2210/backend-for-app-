@@ -13,6 +13,7 @@ var adminSchema = new mongoose.Schema({
     email:String,
     usertype:String,
     brand:String,
+    status:String,
     password:{
         type:String,
         select:true

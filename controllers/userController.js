@@ -132,61 +132,13 @@ const googleLogin = async (req, resp) => {
 
 }
 
-// const userUpdate = async (req, resp) => {
-//     try {
-
-//         const data = req.files;
-//         console.log(data);
-//         const { firstname, lastname, mobile, altmobile, email, address, city, state, pincode, brand, productname, complaint_type, warranty, purchase_date, set_serialno, query } = req.body;
-//         console.log(req.body);
-//         const _id = req.params.id;
-//         const user = await Users.users.findById(_id);
-//         var responseType = {
-//             message: 'ok'
-//         }
-
-//         let imagedata = new Users.data({
-//             invoice: data['invoice'],
-//             issue_image: data['issue_image'],
-//             under_warranty: data['under_warranty'],
-//             firstname: firstname,
-//             lastname: lastname,
-//             mobile: mobile,
-//             altmobile: altmobile,
-//             email: email,
-//             address: address, city: city, state: state, pincode: pincode,
-//             brand: brand,
-//             productname: productname,
-//             complaint_type: complaint_type,
-//             warranty: warranty,
-//             purchase_date: purchase_date,
-//             set_serialno: set_serialno,
-//             query: query,
-//             userId: _id,
-//         })
-
-//         const imagedata_id = imagedata._id;
-//         user.datas.push({ data: imagedata_id });
-//         const response = await imagedata.save();
-//         const result = await user.save();
-
-//         if (response) {
-//             responseType.status = 200;
-//             responseType.id = imagedata_id;
-//         }
-//         resp.status(200).send(responseType);
-
-//     } catch (e) {
-//         resp.send(e);
-//     }
-
-// }
 
 
 const userdetailUpdate = async (req, resp) => {
 
-        const { firstname, lastname, mobile, altmobile, email, address, city, state, pincode, brand, productname, complaint_type, warranty, purchase_date, set_serialno, query } = req.body;
+        const { firstname, lastname, mobile, altmobile, email, address, city, state, pincode,productType, productname, complaint_type, warranty,purchaseMode,  purchase_date, set_serialno, query } = req.body;
         console.log(req.body);
+        const brand = req.body.brand.toLowerCase();
         const _id = req.params.id;
         const user = await Users.users.findById(_id);
         var responseType = {
@@ -202,13 +154,16 @@ const userdetailUpdate = async (req, resp) => {
             email: email,
             address: address, city: city, state: state, pincode: pincode,
             brand: brand,
+            productType:productType,
             productname: productname,
             complaint_type: complaint_type,
             warranty: warranty,
+            purchaseMode:purchaseMode,
             purchase_date: purchase_date,
             set_serialno: set_serialno,
             query: query,
             userId: _id,
+            status: 'initial',
         })
 
         const imagedata_id = imagedata._id;
@@ -723,6 +678,44 @@ const pdfGet = async (req, resp) => {
 
 }
 
+
+const registerWarranty = async (req, resp) => {
+
+    const { name,  mobile,  email, brand,productType, productname,   purchase_date  } = req.body;
+ 
+    const data = req.file;
+      
+   
+    var responseType = {
+        message: 'ok'
+    }
+
+    let imagedata = new Users.warrantyRegister({
+
+        name: name,
+        mobile: mobile,
+        email: email,
+        brand: brand,
+        productType:productType,
+        productName: productname,
+        purchaseDate: purchase_date,
+        invoice: data
+    })
+    const response = await imagedata.save();
+  
+
+    if (response) {
+        responseType.status = 200;
+       
+    }else{
+        responseType.status = 400;
+    }
+    resp.status(responseType.status).send(responseType);
+
+
+
+}
+
 module.exports = {
     userList,
     userAdd,
@@ -744,6 +737,7 @@ module.exports = {
     userdetailUpdate,
     userwarrantyUpdate,
     userissueimgUpdate,
-    pdfGet
+    pdfGet,
+    registerWarranty
 
 }

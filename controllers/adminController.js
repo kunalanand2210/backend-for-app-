@@ -23,8 +23,11 @@ const adminAdd = async (req, resp) => {
                 name,
                 email,
                 password,
-                usertype, brand
+                usertype,
+                brand,
+                status: 'active'
             });
+
             let response = await data.save()
             // let myToken = await data.getAuthToken();
             responseType.message = 'Register Succesfully ';
@@ -45,14 +48,25 @@ const adminLogin = async (req, resp) => {
     var responseType = {
         message: 'ok'
     }
+
     if (user) {
         var match = await bcrypt.compare(req.body.password, user.password);
         let myToken = await user.getAuthToken();
 
+        const adminstatus = user.status === 'active';
+
+
         if (match) {
-            responseType.message = 'Login Successfully';
-            responseType.token = myToken;
-            responseType.status = 200;
+            if (!adminstatus) {
+                responseType.message = 'Not Active User';
+                responseType.status = 400;
+            }
+            else {
+                responseType.message = 'Login Successfully';
+                responseType.token = myToken;
+                responseType.status = 200;
+            }
+
         } else {
             responseType.message = 'Wrong Password';
             responseType.status = 401;
@@ -61,21 +75,41 @@ const adminLogin = async (req, resp) => {
         responseType.message = 'Invalid Email id';
         responseType.status = 404;
     }
-    resp.status(responseType.status).json({ message: 'ok', data: responseType });
+    resp.status(responseType.status).json(responseType);
 
 
 }
 
-const adminDelete = async (req, resp) => {
+const adminEdit = async (req, resp) => {
 
-    Admins.findByIdAndDelete(req.params.id, (err, Admins) => {
-        if (err) return resp.status(500).send(err);
-        const response = {
-            message: "User successfully deleted",
-            status: 200
-        };
-        return resp.status(200).send(response);
-    });
+    const id = req.params.id;
+    const { name, email, password, usertype, brand, status } = req.body;
+    const responseType = {
+        message: "ok noot",
+    };
+
+    if (!name || !email || !password || !usertype || !brand) {
+        responseType.message = 'Some Field is missing';
+        responseType.status = 403;
+
+    } else {
+        const result = await Admins.findById(id);
+
+        result.name = name;
+        result.email = email;
+        result.password = password;
+        result.usertype = usertype;
+        result.brand = brand;
+        result.status = status;
+        result.save();
+        responseType.message = 'Data succesfully update';
+        responseType.status = 200;
+    }
+
+
+
+    return resp.status(responseType.status).send(responseType);
+
 
 }
 
@@ -94,9 +128,11 @@ const adminList = async (req, resp) => {
     resp.status(200).send(responseType);
 }
 
-const adminServiceList = async (req, resp) => {
+const adminListId = async (req, resp) => {
 
-    let data = await Users.data.find({ complaint_type: 'Service' });
+    const id = req.params.id;
+    let data = await Admins.findById(id);
+
     var responseType = {
         message: 'ok',
 
@@ -105,13 +141,40 @@ const adminServiceList = async (req, resp) => {
         responseType.message = 'Get list succesfull';
         responseType.status = 200;
         responseType.result = data;
+    } else {
+        responseType.message = 'Not Found Any Data ';
+        responseType.status = 400;
     }
+    resp.status(responseType.status).send(responseType);
+}
+
+const adminServiceList = async (req, resp) => {
+
+    const brand = req.params.brand;
+    var responseType = {
+        message: 'ok',
+    }
+
+    if (brand === 'all') {
+        let data = await Users.data.find({ complaint_type: 'Service' });
+        responseType.message = 'Get list succesfull';
+        responseType.status = 200;
+        responseType.result = data;
+    }
+    else {
+        let data = await Users.data.find({ complaint_type: 'Service', brand: brand });
+        responseType.message = 'Get list succesfull';
+        responseType.status = 200;
+        responseType.result = data;
+    }
+
     resp.status(200).send(responseType);
 }
 
 const adminInstallationList = async (req, resp) => {
 
     let data = await Users.data.find({ complaint_type: 'Installation' });
+    // let data = await Users.data.find({ complaint_type: 'Service' });
     var responseType = {
         message: 'ok',
 
@@ -144,6 +207,30 @@ const serviceDetails = async (req, resp) => {
     resp.status(responseType.status).send(responseType);
 }
 
+const serviceStatus = async (req, res) => {
+    const id = req.params.id;
+   
+   
+    const { status, adminid } = req.body;
+    var responseType = {
+        message: 'ok',
+    }
+    const result = await Users.data.findById(id);
+
+    if (result) {
+        result.status = status;
+        result.doneby = adminid;
+        result.save();
+        responseType.status = 200;
+        responseType.message = 'update succesfully';
+
+    } else {
+        responseType.status = 400;
+        responseType.message = 'service not Found';
+    }
+  
+    res.status(200).send(responseType);
+}
 
 const paymentdetailUpdate = async (req, resp) => {
     try {
@@ -154,12 +241,12 @@ const paymentdetailUpdate = async (req, resp) => {
             let data = res;
             let datalength = data.length;
             for (let j = 0; j < datalength; j++) {
-        
-              price = price + parseInt(data[j].price);
+
+                price = price + parseInt(data[j].price);
             }
-        
+
             return price
-          }
+        }
 
         const _id = req.params.id;
 
@@ -170,7 +257,7 @@ const paymentdetailUpdate = async (req, resp) => {
 
         const userdetail = await Users.users.findById(data.userid);
 
-        paymentdetail = new Users.paymentdetail({ payments: data.formValues, userId: data.userid, serviceId: _id, name: userdetail.name, email: userdetail.email, address:user.address, state: user.state, city:user.city, pincode:user.pincode, status: 'payment incompleted' , totalpay:extravalue(data.formValues)});
+        paymentdetail = new Users.paymentdetail({ payments: data.formValues, userId: data.userid, serviceId: _id, name: userdetail.name, email: userdetail.email, address: user.address, state: user.state, city: user.city, pincode: user.pincode, status: 'payment incompleted', totalpay: extravalue(data.formValues) });
         paymentdetail_id = paymentdetail._id;
         user.payment_details.push({ payment_detailid: paymentdetail_id });
         const response = await paymentdetail.save();
@@ -191,7 +278,7 @@ const paymentdetailUpdate = async (req, resp) => {
 
 const paymentDelete = async (req, resp) => {
     const _id = req.params.id
-    service = await Users.paymentdetail.findById(_id);
+    const service = await Users.paymentdetail.findById(_id);
 
     const serviceid = service.serviceId;
     const payment_detailid = service._id.valueOf();
@@ -271,8 +358,8 @@ const paymentList = async (req, resp) => {
 const paymentDetail = async (req, resp) => {
     const _id = req.params.id
     let data = await Users.paymentdetail.findById(_id);
-    
-  console.log(data);
+
+    console.log(data);
     var responseType = {
         message: 'ok',
 
@@ -282,7 +369,7 @@ const paymentDetail = async (req, resp) => {
         responseType.status = 200;
         responseType.result = data;
     }
-    else{
+    else {
         responseType.message = 'Error';
         responseType.status = 400;
     }
@@ -290,15 +377,25 @@ const paymentDetail = async (req, resp) => {
 }
 
 
-
+const adminServiceRecord = async (req, resp) => {
+    const adminUserid = req.params.id;
+    const data = await Users.data.find({doneby : adminUserid});
+    if(!data){
+        resp.status(400).send({status:400,message:'Data Not Found'});
+    }
+    else{
+        resp.status(200).send({status:200,message:'Data Successfull',data});
+    }
+   
+}
 
 
 
 module.exports = {
     adminLogin,
     adminAdd,
-    adminDelete,
-    adminList,
+    adminEdit,
+    adminList, adminListId,
     adminServiceList,
     adminInstallationList,
     paymentdetailUpdate,
@@ -306,6 +403,8 @@ module.exports = {
     paymentDelete,
     dashboardData,
     paymentList,
-    paymentDetail,
- 
+    paymentDetail, 
+    serviceStatus,
+    adminServiceRecord
+
 }

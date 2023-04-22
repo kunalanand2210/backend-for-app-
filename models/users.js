@@ -35,6 +35,22 @@ const otpSchema = new mongoose.Schema({
 
 const otp = mongoose.model('otp', otpSchema , 'otp');
 
+const warrantyRegisterSchema = new mongoose.Schema({
+    name:String,
+    mobile:String,
+    email:String,
+    brand:String,
+    productType:String,
+    productName:String,
+    purchaseDate:String,
+    invoice:Array
+  
+},{
+    timestamps:true
+});
+
+const warrantyRegister = mongoose.model('warrantyRegistration', warrantyRegisterSchema );
+
 const dataSchema = new mongoose.Schema({
     firstname:String,
     lastname:String,
@@ -47,9 +63,11 @@ const dataSchema = new mongoose.Schema({
     pincode:String,
 
     brand:String,
+    productType:String,
     productname:String,
     complaint_type:String,
     warranty:String,
+    purchaseMode:String,
     purchase_date:String,
     set_serialno:String,
     query:String,
@@ -61,6 +79,8 @@ const dataSchema = new mongoose.Schema({
         payment_detailid:String,
         
     }],
+    status:String,
+    doneby:String,
 },{
     timestamps:true
 });
@@ -120,4 +140,4 @@ userSchema.methods.getAuthToken = async function(data){
 }
 
 let users = conn.model('users',userSchema)
-module.exports = {users, data, paymentdetail, otp};
+module.exports = {users, data, paymentdetail, otp, warrantyRegister};

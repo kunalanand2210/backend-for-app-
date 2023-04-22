@@ -49,6 +49,8 @@ router.post('/paymentverfication/:id',userCtrl.paymentVerification);
 
 router.post('/pdfget/:id', userCtrl.pdfGet);
 
+router.post('/registerWarranty', upload.uploadwarranty.single('invoice'), userCtrl.registerWarranty);
+
 // const cpUpload = upload.upload.fields([{ name: 'invoice', maxCount: 1 }, { name: 'issue_image', maxCount: 4 }, { name: 'under_warranty', maxCount: 1 }])
 // router.post('/update/:id', cpUpload , userCtrl.userUpdate);
 
