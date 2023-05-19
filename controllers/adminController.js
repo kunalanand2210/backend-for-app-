@@ -390,6 +390,19 @@ const adminServiceRecord = async (req, resp) => {
 }
 
 
+const warrantyData = async (req, resp) => {
+   
+    const data = await Users.warrantyRegister.find();
+    if(!data){
+        resp.status(400).send({status:400,message:'Data Not Found'});
+    }
+    else{
+        resp.status(200).send({status:200,message:'Data Successfull',data});
+    }
+   
+}
+
+
 
 module.exports = {
     adminLogin,
@@ -405,6 +418,7 @@ module.exports = {
     paymentList,
     paymentDetail, 
     serviceStatus,
-    adminServiceRecord
+    adminServiceRecord,
+    warrantyData
 
 }

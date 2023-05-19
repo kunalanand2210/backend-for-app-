@@ -43,7 +43,7 @@ router.get('/paymentlist',  adminCtrl.paymentList);
 
 router.get('/paymentdetail/:id',  adminCtrl.paymentDetail);
 
-
+router.get('/warrantydata',  adminCtrl.warrantyData);
 
 
 module.exports = router;
