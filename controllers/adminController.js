@@ -393,6 +393,7 @@ const adminServiceRecord = async (req, resp) => {
 const warrantyData = async (req, resp) => {
    
     const data = await Users.warrantyRegister.find();
+    
     if(!data){
         resp.status(400).send({status:400,message:'Data Not Found'});
     }
